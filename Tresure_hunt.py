@@ -44,12 +44,12 @@ def create_dictionary( key_list,riddle_list):
     
     return riddle_dictionary
 
-def create_shortList(riddle_dictionary):
+def create_shortList(riddle_dictionary,levels):
     # create a dictionary of random 10 items
     shortList = {}
     
     # loop through the dictionary
-    for i in range(10):
+    for i in range(levels):
         # get a random key
         key = random.choice(list(riddle_dictionary.keys()))
         # add the key and value to the dictionary
@@ -58,18 +58,26 @@ def create_shortList(riddle_dictionary):
         riddle_dictionary.pop(key)
     
     return shortList
+
+def store_winners(name):
+    winner = []
+    winner.append(name)
+    with open("winners.csv",'a') as file:
+        # file.write(name)
+        csvWrite = csv.writer(file)
+        csvWrite.writerow(winner)
+
     
-    
-def play_Treasure_Hunt(round_number):
+def play_Treasure_Hunt(round_number,levels):
     
     round_file = 'Round_' + str(round_number) + '.csv'
     
-    riddles_list = read_csv_file('riddles.csv')
+    riddles_list = read_csv_file('Riddles.csv')
     keys_list = read_csv_file(round_file)
 
     # create a dictionary
     riddles = create_dictionary(keys_list, riddles_list)
-    riddles = create_shortList(riddles)
+    riddles = create_shortList(riddles,levels)
     
     keys_list = list(riddles.keys())
 
@@ -82,8 +90,8 @@ def play_Treasure_Hunt(round_number):
     os.system("cls")
     
     # for debugging
-    # for key in keys_list:
-    #     print(key)
+    for key in keys_list:
+        print(key)
     
     print("Find the first Key !! \n")
     
@@ -99,7 +107,7 @@ def play_Treasure_Hunt(round_number):
             exit()    
             
         time.sleep(1)
-        if(user_key == keys_list[counter] and counter < len(keys_list)):
+        if(user_key == keys_list[counter] and counter < len(keys_list) - 1):
             os.system('cls')
             print("\nCongratulation !! You found the key !!\n")
             print("Next Riddle Unlocked !!\n")
@@ -108,10 +116,17 @@ def play_Treasure_Hunt(round_number):
             counter += 1
             print(riddle_art[counter])
             print(riddles[keys_list[counter]])
-        else:
+        elif(user_key != keys_list[counter]):
             os.system('cls')
             print("\nOops thats the wrong Key !!\n")
             print(Gameover)
+            time.sleep(5)
+            break
+        else:
+            os.system('cls')
+            print(congradulations)
+            name = input("Please Enter your Ticket Number:  ")
+            store_winners(name)
             time.sleep(5)
             break
         
@@ -126,8 +141,8 @@ while(keep_playing):
     print(logo)
     
     round_number = 1
-    
-    play_Treasure_Hunt(round_number)
+    levels = 20
+    play_Treasure_Hunt(round_number,levels)
     
     os.system('cls')
     if(input(play_again) != 'y'):
