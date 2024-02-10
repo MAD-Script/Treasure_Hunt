@@ -2,7 +2,9 @@ import csv
 import os
 import random
 import time
+import serial
 from Tresure_hunt_art import *
+
 
 
 """the shortcuts based on + (including the implied use in sum) are, of necessity,
@@ -68,12 +70,10 @@ def store_winners(name):
         csvWrite.writerow(winner)
 
     
-def play_Treasure_Hunt(round_number,levels):
-    
-    round_file = 'Round_' + str(round_number) + '.csv'
+def play_Treasure_Hunt(levels,arduino):
     
     riddles_list = read_csv_file('Riddles.csv')
-    keys_list = read_csv_file(round_file)
+    keys_list = read_csv_file('rfid_uid.csv')
 
     # create a dictionary
     riddles = create_dictionary(keys_list, riddles_list)
@@ -90,8 +90,8 @@ def play_Treasure_Hunt(round_number,levels):
     os.system("cls")
     
     # for debugging
-    for key in keys_list:
-        print(key)
+    # for key in keys_list:
+    #     print(key)
     
     print("Find the first Key !! \n")
     
@@ -101,11 +101,17 @@ def play_Treasure_Hunt(round_number,levels):
     
         
     while(True):
-        user_key = input("Enter the key: ").upper()
+        # user_key = input("Enter the key: ").upper()
         
-        if(user_key == 'QUIT' or user_key == 'Q'):
-            exit()    
-            
+        # if(user_key == 'QUIT' or user_key == 'Q'):
+        #     exit()    
+
+        if (arduino.inWaiting()>0):
+            time.sleep(0.01)
+            user_key = arduino.readline()
+            user_key = user_key.decode('utf-8')        
+            user_key = user_key.replace('\r\n','')
+        
         time.sleep(1)
         if(user_key == keys_list[counter] and counter < len(keys_list) - 1):
             os.system('cls')
@@ -140,9 +146,11 @@ while(keep_playing):
     os.system('cls')
     print(logo)
     
-    round_number = 1
-    levels = 20
-    play_Treasure_Hunt(round_number,levels)
+    ser = serial.Serial('COM8', 9800, timeout=1)
+    os.system("cls")   
+    
+    levels = 3
+    play_Treasure_Hunt(levels,ser)
     
     os.system('cls')
     if(input(play_again) != 'y'):
